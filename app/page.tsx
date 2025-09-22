@@ -17,12 +17,22 @@ export default function Home() {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            entry.target.classList.add("animate-fade-in-up")
+            // Remove any existing animation classes
+            sectionsRef.current.forEach((section) => {
+              if (section && section !== entry.target) {
+                section.classList.remove("animate-pop-in")
+                section.classList.add("animate-pop-out")
+              }
+            })
+            
+            // Add pop-in animation to the current section
+            entry.target.classList.remove("animate-pop-out", "animate-fade-in-up")
+            entry.target.classList.add("animate-pop-in")
             setActiveSection(entry.target.id)
           }
         })
       },
-      { threshold: 0.3, rootMargin: "0px 0px -20% 0px" },
+      { threshold: 0.4, rootMargin: "0px 0px -10% 0px" },
     )
 
     sectionsRef.current.forEach((section) => {
@@ -51,12 +61,30 @@ export default function Home() {
 
       <nav className="fixed left-8 top-1/2 -translate-y-1/2 z-10 hidden lg:block">
         <div className="flex flex-col gap-4">
-          {["about", "projects", "connect"].map((section) => (
+          {["about", "projects", "experience", "connect"].map((section, index) => (
             <button
               key={section}
-              onClick={() => document.getElementById(section)?.scrollIntoView({ behavior: "smooth" })}
-              className={`w-2 h-8 rounded-full transition-all duration-500 ${
-                activeSection === section ? "bg-foreground" : "bg-muted-foreground/30 hover:bg-muted-foreground/60"
+              onClick={() => {
+                const targetElement = document.getElementById(section)
+                if (targetElement) {
+                  // Trigger pop-out effect on other sections
+                  sectionsRef.current.forEach((sec, idx) => {
+                    if (sec && idx !== index) {
+                      sec.classList.remove("animate-pop-in")
+                      sec.classList.add("animate-pop-out")
+                    }
+                  })
+                  
+                  // Scroll and trigger pop-in on target
+                  targetElement.scrollIntoView({ behavior: "smooth" })
+                  setTimeout(() => {
+                    targetElement.classList.remove("animate-pop-out")
+                    targetElement.classList.add("animate-pop-in")
+                  }, 300)
+                }
+              }}
+              className={`w-2 h-8 rounded-full transition-all duration-500 hover:scale-125 ${
+                activeSection === section ? "bg-foreground shadow-lg" : "bg-muted-foreground/30 hover:bg-muted-foreground/60"
               }`}
               aria-label={`Navigate to ${section}`}
             />
@@ -68,12 +96,12 @@ export default function Home() {
         <header
           id="about"
           ref={(el) => (sectionsRef.current[0] = el)}
-          className="min-h-screen flex items-center opacity-0"
+          className="min-h-screen flex items-center opacity-0 py-8 sm:py-12"
         >
-          <div className="grid lg:grid-cols-5 gap-12 sm:gap-16 w-full">
-            <div className="lg:col-span-3 space-y-8 sm:space-y-10">
-              <div className="space-y-3 sm:space-y-2">
-                <div className="text-sm text-muted-foreground font-mono tracking-wider">PORTFOLIO / 2025</div>
+          <div className="grid lg:grid-cols-5 gap-12 sm:gap-16 w-full relative px-8">
+            <div className="lg:col-span-3 space-y-6 sm:space-y-8">
+              
+              <div className="space-y-4">
                 <h1 className="text-5xl sm:text-6xl lg:text-7xl font-light tracking-tight">
                   Ace G.
                   <br />
@@ -81,7 +109,7 @@ export default function Home() {
                 </h1>
               </div>
 
-              <div className="flex items-start gap-6 p-6 border border-border rounded-lg bg-card/50 backdrop-blur-sm">
+              <div className="flex items-start gap-6 p-6 card-elevated backdrop-blur-sm">
                 <div className="w-20 h-20 rounded-full overflow-hidden bg-muted flex-shrink-0 ring-2 ring-border">
                   <img
                     src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/formal_pic.jpg-l88Bq8bU0H03jNsN3HRHK9mpFL9iEk.jpeg"
@@ -99,7 +127,7 @@ export default function Home() {
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {["Python", "Machine Learning", "Data Analysis", "SQL"].map((skill) => (
+                    {["Data Science", "ML Engineering"].map((skill) => (
                       <span key={skill} className="px-2 py-1 text-xs bg-accent text-accent-foreground rounded border">
                         {skill}
                       </span>
@@ -108,7 +136,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="space-y-6 max-w-lg">
+              <div className="space-y-5 max-w-lg">
                 <p className="text-lg sm:text-xl text-muted-foreground leading-relaxed">
                   Consistent Dean's Lister crafting intelligent solutions at the intersection of
                   <span className="text-foreground"> machine learning</span>,
@@ -120,21 +148,11 @@ export default function Home() {
                   Active member of SCRIPT organization with experience in database engineering and system architecture.
                   Passionate about transforming complex data into actionable insights and building scalable solutions.
                 </p>
-
-                <div className="grid grid-cols-2 gap-4 pt-4">
-                  <div className="text-center p-3 border border-border rounded-lg">
-                    <div className="text-xl font-semibold">4+</div>
-                    <div className="text-xs text-muted-foreground">Projects</div>
-                  </div>
-                  <div className="text-center p-3 border border-border rounded-lg">
-                    <div className="text-xl font-semibold">2026</div>
-                    <div className="text-xs text-muted-foreground">Graduate</div>
-                  </div>
-                </div>
               </div>
             </div>
 
             <div className="lg:col-span-2 flex flex-col justify-center space-y-8 mt-8 lg:mt-0">
+              
               <div className="space-y-6">
                 <div className="space-y-4">
                   <div className="text-sm text-muted-foreground font-mono">CURRENTLY</div>
@@ -148,7 +166,7 @@ export default function Home() {
                 <div className="space-y-4">
                   <div className="text-sm text-muted-foreground font-mono">EXPERTISE</div>
                   <div className="flex flex-wrap gap-2">
-                    {["Python", "Machine Learning", "Data Analysis", "SQL", "Flutter", "Pandas"].map((skill) => (
+                    {["Python", "Machine Learning", "Data Analysis", "SQL", "Flask", "MySQL", "Flutter", "Pandas", "NumPy", "Matplotlib"].map((skill) => (
                       <span
                         key={skill}
                         className="px-3 py-1 text-xs border border-border rounded-full hover:border-muted-foreground/50 transition-colors duration-300"
@@ -184,6 +202,42 @@ export default function Home() {
                     <div className="text-sm text-muted-foreground">09920510122</div>
                   </div>
                 </div>
+
+                <div className="space-y-4">
+                  <div className="text-sm text-muted-foreground font-mono">OVERVIEW</div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="text-center p-3 card-elevated">
+                      <div className="text-xl font-semibold">4+</div>
+                      <div className="text-xs text-muted-foreground">Projects</div>
+                    </div>
+                    <div className="text-center p-3 card-elevated">
+                      <div className="text-xl font-semibold">2026</div>
+                      <div className="text-xs text-muted-foreground">Graduate</div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* GitHub Icon */}
+                <div className="flex items-center justify-center mt-6">
+                  <a 
+                    href="https://github.com/AcePenaflorida" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="p-3 rounded-full bg-card border hover:bg-accent transition-colors group"
+                    title="Visit my GitHub profile"
+                  >
+                    <svg 
+                      width="24" 
+                      height="24" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="w-6 h-6 fill-current group-hover:scale-105 transition-transform"
+                    >
+                      <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12Z"/>
+                    </svg>
+                  </a>
+                </div>
               </div>
             </div>
           </div>
@@ -192,9 +246,9 @@ export default function Home() {
         <section
           id="projects"
           ref={(el) => (sectionsRef.current[1] = el)}
-          className="min-h-screen py-20 sm:py-32 opacity-0"
+          className="min-h-screen py-12 sm:py-16 opacity-0"
         >
-          <div className="space-y-12 sm:space-y-16">
+          <div className="section-layer p-8 sm:p-12 space-y-12 sm:space-y-16">
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
               <h2 className="text-3xl sm:text-4xl font-light">Selected Projects</h2>
               <div className="text-sm text-muted-foreground font-mono">REPOSITORIES</div>
@@ -253,7 +307,7 @@ export default function Home() {
               ].map((project, index) => (
                 <article
                   key={index}
-                  className="group p-6 border border-border rounded-lg bg-card hover:border-muted-foreground/50 transition-all duration-300 hover:shadow-lg cursor-pointer"
+                  className="group card-elevated p-6 cursor-pointer"
                 >
                   <div className="space-y-4">
                     <div className="flex items-start justify-between">
@@ -275,7 +329,7 @@ export default function Home() {
                       {project.tech.map((tech) => (
                         <span
                           key={tech}
-                          className="px-2 py-1 text-xs bg-accent text-accent-foreground rounded-full border border-border"
+                          className="px-2 py-1 text-xs bg-accent text-accent-foreground rounded-full border border-border hover:bg-accent/80 transition-colors"
                         >
                           {tech}
                         </span>
@@ -335,8 +389,69 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="connect" ref={(el) => (sectionsRef.current[2] = el)} className="py-20 sm:py-32 opacity-0">
-          <div className="grid lg:grid-cols-2 gap-12 sm:gap-16">
+        <section
+          id="experience"
+          ref={(el) => (sectionsRef.current[2] = el)}
+          className="py-8 sm:py-12 opacity-0"
+        >
+          <div className="section-layer p-8 sm:p-12 space-y-8 sm:space-y-10">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+              <h2 className="text-3xl sm:text-4xl font-light">Recent Experience</h2>
+              <div className="text-sm text-muted-foreground font-mono">WORK</div>
+            </div>
+
+            <div className="p-6 card-elevated backdrop-blur-sm">
+              <div className="space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                  <div>
+                    <h3 className="text-lg font-semibold text-foreground">Database Engineer</h3>
+                    <p className="text-muted-foreground">Center for AI and Smart Technologies</p>
+                    <p className="text-sm text-muted-foreground">Batangas State University (Pablo Borbon)</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <span className="text-xs text-muted-foreground font-mono">RECENT</span>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <ul className="space-y-2 text-muted-foreground">
+                    <li className="flex items-start gap-2">
+                      <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full mt-2 flex-shrink-0"></span>
+                      <span>Designed database schema and ERD for a system module</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full mt-2 flex-shrink-0"></span>
+                      <span>Coordinated with other module teams for integration</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full mt-2 flex-shrink-0"></span>
+                      <span>Used MySQL Workbench for ERD, documentation, and data dictionary</span>
+                    </li>
+                  </ul>
+
+                  <div className="flex flex-wrap gap-2 pt-2">
+                    {["MySQL Workbench", "Database Design", "ERD", "System Integration"].map((skill) => (
+                      <span
+                        key={skill}
+                        className="px-2 py-1 text-xs bg-accent text-accent-foreground rounded-full border border-border"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section
+          id="connect"
+          ref={(el) => (sectionsRef.current[3] = el)}
+          className="py-8 sm:py-12 opacity-0"
+        >
+          <div className="section-layer p-8 sm:p-12 grid lg:grid-cols-2 gap-12 sm:gap-16">
             <div className="space-y-6 sm:space-y-8">
               <h2 className="text-3xl sm:text-4xl font-light">Let's Connect</h2>
 
@@ -369,68 +484,24 @@ export default function Home() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {[
-                  { name: "GitHub", handle: "@ace_penaflorida" },
-                  { name: "LinkedIn", handle: "Ace Peñaflorida" },
-                  { name: "Email", handle: "ace.g.penaflorida@gmail.com" },
-                  { name: "Phone", handle: "09920510122" },
+                  { name: "GitHub", handle: "@ace_penaflorida", href: "https://github.com/AcePenaflorida" },
+                  { name: "LinkedIn", handle: "Ace Peñaflorida", href: "https://linkedin.com/in/ace-penaflorida" },
+                  { name: "Email", handle: "ace.g.penaflorida@gmail.com", href: "mailto:ace.g.penaflorida@gmail.com" },
+                  { name: "Phone", handle: "09920510122", href: "tel:+639920510122" },
                 ].map((social) => (
-                  <div key={social.name} className="p-4 border border-border rounded-lg">
+                  <Link
+                    key={social.name}
+                    href={social.href}
+                    target={social.name !== "Phone" && social.name !== "Email" ? "_blank" : undefined}
+                    rel={social.name !== "Phone" && social.name !== "Email" ? "noopener noreferrer" : undefined}
+                    className="block p-4 card-elevated hover:border-muted-foreground/50 transition-all duration-300 group"
+                  >
                     <div className="space-y-2">
-                      <div className="text-foreground">{social.name}</div>
+                      <div className="text-foreground group-hover:text-primary transition-colors duration-300">{social.name}</div>
                       <div className="text-sm text-muted-foreground break-all">{social.handle}</div>
                     </div>
-                  </div>
+                  </Link>
                 ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-16 sm:mt-20 pt-12 sm:pt-16 border-t border-border">
-            <div className="space-y-8 sm:space-y-10">
-              <h3 className="text-2xl sm:text-3xl font-light">Recent Experience</h3>
-
-              <div className="p-6 border border-border rounded-lg bg-card/30 backdrop-blur-sm">
-                <div className="space-y-4">
-                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
-                    <div>
-                      <h4 className="text-lg font-semibold text-foreground">Database Engineer</h4>
-                      <p className="text-muted-foreground">Center for AI and Smart Technologies</p>
-                      <p className="text-sm text-muted-foreground">Batangas State University (Pablo Borbon)</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                      <span className="text-xs text-muted-foreground font-mono">RECENT</span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <ul className="space-y-2 text-muted-foreground">
-                      <li className="flex items-start gap-2">
-                        <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full mt-2 flex-shrink-0"></span>
-                        <span>Designed database schema and ERD for a system module</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full mt-2 flex-shrink-0"></span>
-                        <span>Coordinated with other module teams for integration</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full mt-2 flex-shrink-0"></span>
-                        <span>Used MySQL Workbench for ERD, documentation, and data dictionary</span>
-                      </li>
-                    </ul>
-
-                    <div className="flex flex-wrap gap-2 pt-2">
-                      {["MySQL Workbench", "Database Design", "ERD", "System Integration"].map((skill) => (
-                        <span
-                          key={skill}
-                          className="px-2 py-1 text-xs bg-accent text-accent-foreground rounded-full border border-border"
-                        >
-                          {skill}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
