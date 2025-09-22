@@ -2,7 +2,7 @@
 const nextConfig = {
   output: 'export',
   trailingSlash: true,
-  // basePath: '/ace-penaflorida-portfolio', // Commented out for local development
+  basePath: '/ace-penaflorida-portfolio',
   eslint: {
     ignoreDuringBuilds: true,
   },
